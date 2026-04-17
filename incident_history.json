@@ -1,0 +1,62 @@
+[
+    {
+        "id": "42e3f761-0721-4b57-b7ec-e7b8a4961034",
+        "reporter_name": "Parminder",
+        "victim_name": "Kishon",
+        "original_incident": "went for a walk",
+        "timestamp": "2026-04-15T16:41:18",
+        "summary": "An employee took a walk during work hours.",
+        "category": "General Incident",
+        "severity": "Low",
+        "action": "Encourage employees to take scheduled breaks to ensure productivity and safety.",
+        "status": "Open"
+    },
+    {
+        "id": "d10d1b3d-cca6-4b96-9570-639a51d9a80c",
+        "reporter_name": "Parminder",
+        "victim_name": "",
+        "original_incident": "Worker slipped on oily surface near machinery area",
+        "timestamp": "2026-04-15T15:44:54",
+        "summary": "A worker experienced a slip due to an oily surface in the vicinity of the machinery area.",
+        "category": "Slip/Fall",
+        "severity": "Medium",
+        "action": "Implement regular cleaning protocols and install anti-slip mats in the machinery area.",
+        "status": "Closed"
+    },
+    {
+        "id": "b6aac431-dbdd-4c92-a14b-ef0c08998511",
+        "reporter_name": "Jontty",
+        "victim_name": "",
+        "original_incident": "Worker cut hand while handling sharp metal sheet without gloves",
+        "timestamp": "2026-04-15T15:44:43",
+        "summary": "A worker sustained a cut on their hand while handling a sharp metal sheet without the use of gloves.",
+        "category": "Personal Injury",
+        "severity": "Medium",
+        "action": "Implement mandatory use of personal protective equipment (PPE) when handling sharp materials and provide training on safe handling practices.",
+        "status": "Open"
+    },
+    {
+        "id": "7f377c85-1f9a-4d2d-b280-574e0806578a",
+        "reporter_name": "Superman",
+        "victim_name": "",
+        "original_incident": "Gas leak detected in confined space causing breathing issues to multiple workers",
+        "timestamp": "2026-04-15T15:44:33",
+        "summary": "A gas leak was identified in a confined area, resulting in respiratory difficulties for several employees.",
+        "category": "Fire Hazard",
+        "severity": "High",
+        "action": "Evacuate the area immediately, conduct a thorough investigation, and implement measures to repair the leak and ensure proper ventilation.",
+        "status": "Under Review"
+    },
+    {
+        "id": "556fcd31-a474-4c27-a72f-81128811c81f",
+        "reporter_name": "Batman",
+        "victim_name": "",
+        "original_incident": "Fire broke out in electrical panel room causing heavy smoke and evacuation",
+        "timestamp": "2026-04-15T15:44:24",
+        "summary": "A fire occurred in the electrical panel room, resulting in significant smoke and necessitating an evacuation of the premises.",
+        "category": "Fire Hazard",
+        "severity": "High",
+        "action": "Conduct a thorough investigation of the electrical panel and implement fire safety measures, including regular inspections and employee training on emergency procedures.",
+        "status": "Under Review"
+    }
+]

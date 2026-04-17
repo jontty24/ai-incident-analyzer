@@ -1,0 +1,26 @@
+[
+    {
+        "original_incident": "Forklift malfunctioned and dropped a load in the warehouse",
+        "timestamp": "2026-04-14T14:57:59.461204",
+        "summary": "A malfunction with the forklift resulted in a load being dropped in the warehouse, posing a safety risk.",
+        "category": "Equipment Issue",
+        "severity": "Medium",
+        "action": "Inspect and service the forklift immediately; ensure all operators are re-trained on equipment usage."
+    },
+    {
+        "original_incident": "Smoke detected near electrical panel in storage room",
+        "timestamp": "2026-04-14T14:58:15.844346",
+        "summary": "Smoke was detected in proximity to the electrical panel located in the storage room, indicating a potential fire hazard.",
+        "category": "Fire Hazard",
+        "severity": "High",
+        "action": "Evacuate the area immediately and contact emergency services. Conduct a thorough inspection of the electrical panel and the surrounding area."
+    },
+    {
+        "original_incident": "Worker slipped near stairs and injured shoulder",
+        "timestamp": "2026-04-14T14:58:24.066285",
+        "summary": "A worker experienced a slip and fall incident near the stairs, resulting in a shoulder injury.",
+        "category": "Slip/Fall",
+        "severity": "Medium",
+        "action": "Install anti-slip mats near the stairs and conduct a safety training session on proper stair navigation."
+    }
+]

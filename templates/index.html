@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Incident Analyzer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f4f6f8;
+        }
+
+        h1, h2 {
+            color: #222;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 16px;
+            font-size: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #1f6feb;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1558c0;
+        }
+
+        .result, .history-card {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 10px;
+            background: white;
+            border: 1px solid #ddd;
+        }
+
+        .field {
+            margin-bottom: 10px;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error {
+            margin-top: 15px;
+            color: #b00020;
+            font-weight: bold;
+        }
+
+        .history-section {
+            margin-top: 40px;
+        }
+
+        .history-card {
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        #loading {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+        .severity-high {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        .severity-medium {
+            color: #f9a825;
+            font-weight: bold;
+        }
+
+        .severity-low {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 18px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #222;
+        }
+        select {
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>AI Incident Analyzer</h1>
+    <div class="dashboard">
+        <div class="stat-card" style="background-color: lightgreen;">
+            <div class="stat-label">Total Incidents</div>
+            <div class="stat-value" id="total_incidents">0</div>
+        </div>
+
+        <div class="stat-card" style="background-color:indianred">
+            <div class="stat-label">High Severity</div>
+            <div class="stat-value" id="high_severity">0</div>
+        </div>
+
+        <div class="stat-card" style="background-color:cornflowerblue">
+            <div class="stat-label">Open Incidents</div>
+            <div class="stat-value" id="open_incidents">0</div>
+        </div>
+
+        <div class="stat-card" style="background-color:peru">
+            <div class="stat-label">Most Common Category</div>
+            <div class="stat-value" id="common_category">-</div>
+        </div>
+    </div>
+    <form id="form">
+        <input type="text" name="reporter_name" placeholder="Reporter Name" required style="width:100%; padding:10px; margin-bottom:10px; box-sizing:border-box;">
+        
+        <input type="text" name="victim_name" placeholder="Victim Name" style="width:100%; padding:10px; margin-bottom:10px; box-sizing:border-box;">
+
+        <textarea name="incident" rows="5" placeholder="Enter incident description..." required></textarea>
+        <br><br>
+        <button type="submit">Analyze</button>
+    </form>
+
+    <div id="loading" class="hidden">Analyzing... please wait</div>
+
+    <div id="error" class="error hidden"></div>
+
+    <div id="result" class="result hidden">
+        <h2>Latest Analysis</h2>
+        <div class="field"><span class="label">Reporter Name:</span> <span id="reporter_name"></span></div>
+        <div class="field"><span class="label">Victim Name:</span> <span id="victim_name"></span></div>
+        <div class="field"><span class="label">Original Incident:</span> <span id="original_incident"></span></div>
+        <div class="field"><span class="label">Timestamp:</span> <span id="timestamp"></span></div>
+        <div class="field"><span class="label">Summary:</span> <span id="summary"></span></div>
+        <div class="field"><span class="label">Category:</span> <span id="category"></span></div>
+        <div class="field"><span class="label">Severity:</span> <span id="severity"></span></div>
+        <div class="field"><span class="label">Action:</span> <span id="action"></span></div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;">
+        <h2>Incident History</h2>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+            <input
+            type="text"
+            id="searchInput"
+            placeholder="Search incidents..."
+            oninput="loadHistory()"
+            style="padding:8px 10px; border:1px solid #ccc; border-radius:8px; width:220px;"
+            >   
+            <select id="statusFilter" onchange="loadHistory()">
+                <option value="All">All Statuses</option>
+                <option value="Open">Open</option>
+                <option value="Under Review">Under Review</option>
+                <option value="Closed">Closed</option>
+            </select>
+
+            <select id="severityFilter" onchange="loadHistory()">
+                <option value="All">All Severities</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+            <button type="button" onclick="downloadCSV()">Download CSV</button>
+            <button type="button" onclick="clearHistory()">Clear All</button>
+        </div>
+    </div>
+    <div id="history"></div>
+
+    <script>
+        const form = document.getElementById("form");
+        const resultBox = document.getElementById("result");
+        const errorBox = document.getElementById("error");
+        const historyBox = document.getElementById("history");
+
+        function renderLatest(data) {
+            resultBox.classList.remove("hidden");
+            document.getElementById("reporter_name").textContent = data.reporter_name || "";
+            document.getElementById("victim_name").textContent = data.victim_name || "";
+            document.getElementById("original_incident").textContent = data.original_incident || "";
+            document.getElementById("timestamp").textContent = data.timestamp || "";
+            document.getElementById("summary").textContent = data.summary || "";
+            document.getElementById("category").textContent = data.category || "";
+            const severityEl = document.getElementById("severity");
+            severityEl.textContent = data.severity || "";
+
+            severityEl.className = ""; // reset
+
+            if (data.severity === "High") {
+                severityEl.classList.add("severity-high");
+            } else if (data.severity === "Medium") {
+                severityEl.classList.add("severity-medium");
+            } else if (data.severity === "Low") {
+                severityEl.classList.add("severity-low");
+            }
+            document.getElementById("action").textContent = data.action || "";
+        }
+        function updateDashboard(items) {
+            const total = items.length;
+            const highSeverity = items.filter(item => item.severity === "High").length;
+            const openIncidents = items.filter(item => (item.status || "Open") === "Open").length;
+
+            const categoryCounts = {};
+            items.forEach(item => {
+                const category = item.category || "Unknown";
+                categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+            });
+
+            let mostCommonCategory = "-";
+            let maxCount = 0;
+
+            for (const category in categoryCounts) {
+                if (categoryCounts[category] > maxCount) {
+                    maxCount = categoryCounts[category];
+                    mostCommonCategory = category;
+                }
+            }
+
+            document.getElementById("total_incidents").textContent = total;
+            document.getElementById("high_severity").textContent = highSeverity;
+            document.getElementById("open_incidents").textContent = openIncidents;
+            document.getElementById("common_category").textContent = mostCommonCategory;
+        }
+
+        async function clearHistory() {
+            if (!confirm("Delete all incident history?")) return;
+
+            const res = await fetch("/clear", {
+                method: "DELETE"
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                document.getElementById("result").classList.add("hidden");
+                await loadHistory();
+            } else {
+                alert("Failed to clear history");
+            }
+        }
+
+        function renderHistory(items) {
+                const historyBox = document.getElementById("history");
+
+                if (!historyBox) {
+                    console.error("Element with id='history' not found");
+                    return;
+                }
+
+                historyBox.innerHTML = "";
+
+            if (!items.length) {
+                historyBox.innerHTML = "<p>No incident history yet.</p>";
+                return;
+            }
+
+            items.forEach((item) => {
+                const card = document.createElement("div");
+                card.className = "history-card";
+
+                const selectedOpen = (item.status || "Open") === "Open" ? "selected" : "";
+                const selectedReview = item.status === "Under Review" ? "selected" : "";
+                const selectedClosed = item.status === "Closed" ? "selected" : "";
+
+                const statusControl = item.id
+                    ? `
+                    <select onchange="updateStatus('${item.id}', this.value)">
+                        <option value="Open" ${selectedOpen}>Open</option>
+                        <option value="Under Review" ${selectedReview}>Under Review</option>
+                        <option value="Closed" ${selectedClosed}>Closed</option>
+                    </select>
+                    `
+                    : `<span style="color:red;">Missing ID</span>`;
+
+                card.innerHTML = `
+                    <div class="field"><span class="label">Reporter Name:</span> ${item.reporter_name || ""}</div>
+                    <div class="field"><span class="label">Victim Name:</span> ${item.victim_name || ""}</div>
+                    <div class="field"><span class="label">Original Incident:</span> ${item.original_incident || ""}</div>
+                    <div class="field"><span class="label">Timestamp:</span> ${item.timestamp || ""}</div>
+                    <div class="field"><span class="label">Summary:</span> ${item.summary || ""}</div>
+                    <div class="field"><span class="label">Category:</span> ${item.category || ""}</div>
+                    <div class="field">
+                        <span class="label">Severity:</span>
+                        <span class="${
+                            item.severity === "High" ? "severity-high" :
+                            item.severity === "Medium" ? "severity-medium" :
+                            "severity-low"
+                        }">
+                            ${item.severity || ""}
+                        </span>
+                    </div>
+                    <div class="field"><span class="label">Action:</span> ${item.action || ""}</div>
+                    <div class="field"><span class="label">Status:</span> ${statusControl}</div>
+                    ${item.id ? `<button onclick="deleteIncident('${item.id}')">Delete</button>` : ""}
+                `;
+
+                historyBox.appendChild(card);
+            });
+        }
+        function downloadCSV() {
+            window.location.href = "/download_csv";
+        }
+        async function deleteIncident(index) {
+            if (!confirm("Delete this incident?")) return;
+
+            const res = await fetch(`/delete/${index}`, {
+                method: "DELETE"
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                await loadHistory();
+            } else {
+                alert("Failed to delete");
+            }
+        }
+
+        async function loadHistory() {
+            const res = await fetch("/history");
+            const data = await res.json();
+
+            const selectedStatus = document.getElementById("statusFilter").value;
+            const selectedSeverity = document.getElementById("severityFilter").value;
+            const searchText = document.getElementById("searchInput").value.trim().toLowerCase();
+
+            const filteredData = data.filter(item => {
+                const status = (item.status || "Open").trim().toLowerCase();
+                const severity = (item.severity || "").trim().toLowerCase();
+
+                const statusMatch =
+                    selectedStatus === "All" || status === selectedStatus.toLowerCase();
+
+                const severityMatch =
+                    selectedSeverity === "All" || severity === selectedSeverity.toLowerCase();
+
+                const searchableText = `
+                    ${item.reporter_name || ""}
+                    ${item.victim_name || ""}
+                    ${item.original_incident || ""}
+                    ${item.summary || ""}
+                    ${item.category || ""}
+                `.toLowerCase();
+
+                const searchMatch =
+                    !searchText || searchableText.includes(searchText);
+
+                return statusMatch && severityMatch && searchMatch;
+            });
+
+            renderHistory(filteredData);
+            updateDashboard(data);
+        }
+
+        async function updateStatus(id, newStatus) {
+            console.log("Updating status:", id, newStatus);
+
+            const res = await fetch(`/update_status/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            const data = await res.json();
+            console.log("Status update response:", data);
+
+            if (data.success) {
+                await loadHistory();
+            } else {
+                alert("Failed to update status");
+            }
+        }
+
+       form.onsubmit = async (e) => {
+        e.preventDefault();
+
+        errorBox.classList.add("hidden");
+        errorBox.textContent = "";
+
+        const button = form.querySelector("button");
+        const loading = document.getElementById("loading");
+
+        // 👉 START LOADING STATE
+        button.disabled = true;
+        button.textContent = "Analyzing...";
+        loading.classList.remove("hidden");
+
+        const formData = new FormData(form);
+
+        try {
+            const res = await fetch("/analyze", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await res.json();
+
+            if (!res.ok || data.error) {
+                errorBox.textContent = data.error || "Something went wrong.";
+                errorBox.classList.remove("hidden");
+                return;
+            }
+
+            renderLatest(data);
+            form.reset();
+            await loadHistory();
+
+        } catch (err) {
+            errorBox.textContent = "Network error. Try again.";
+            errorBox.classList.remove("hidden");
+        }
+
+        // 👉 END LOADING STATE
+        button.disabled = false;
+        button.textContent = "Analyze";
+        loading.classList.add("hidden");
+    };
+
+        loadHistory();
+    </script>
+
+</body>
+</html>
